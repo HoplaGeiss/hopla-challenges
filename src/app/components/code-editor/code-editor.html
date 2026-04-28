@@ -1,0 +1,14 @@
+<div class="editor-container">
+  <div class="tab-bar">
+    <div class="tab active">
+      <span class="tab-icon">TS</span>
+      <span>{{ filename() }}</span>
+    </div>
+  </div>
+  <div class="monaco-wrapper">
+    <ngx-monaco-editor
+      [options]="editorOptions"
+      (onInit)="onEditorInit($event)"
+    />
+  </div>
+</div>

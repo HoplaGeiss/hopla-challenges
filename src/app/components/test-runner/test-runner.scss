@@ -1,0 +1,95 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.results-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #1a1a2e;
+  font-size: 13px;
+  overflow: hidden;
+}
+
+.results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-bottom: 0.5px solid #2d2d3a;
+  flex-shrink: 0;
+}
+
+.panel-title {
+  font-weight: 600;
+  color: #e0e0e0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary {
+  font-size: 12px;
+  color: #888;
+}
+
+.progress-bar-track {
+  height: 3px;
+  background: #2d2d3a;
+  flex-shrink: 0;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: #22c55e;
+  transition: width 0.3s ease;
+}
+
+.test-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.test-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 16px;
+  border-bottom: 0.5px solid #1f1f2e;
+  flex-wrap: wrap;
+
+  &.pass .test-icon { color: #22c55e; }
+  &.fail .test-icon { color: #ef4444; }
+}
+
+.test-icon {
+  font-size: 12px;
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+.test-name {
+  color: #d0d0d0;
+  flex: 1;
+}
+
+.test-error {
+  width: 100%;
+  padding-left: 20px;
+  font-family: 'Fira Code', Consolas, monospace;
+  font-size: 11px;
+  color: #f87171;
+  margin-top: 2px;
+}
+
+.empty-state {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+  font-size: 13px;
+}

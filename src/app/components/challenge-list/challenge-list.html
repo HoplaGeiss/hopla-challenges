@@ -1,0 +1,35 @@
+<div class="list-page">
+  <header class="list-header">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" width="32" height="32" fill="#DD0031">
+        <path d="M12 1L3 5v6c0 5.25 3.75 10.15 9 11.25C17.25 21.15 21 16.25 21 11V5L12 1z"/>
+      </svg>
+      <span class="logo-text">hoplaChallenges</span>
+    </div>
+    <span class="global-progress">{{ stats().solved }} / {{ stats().total }} solved</span>
+  </header>
+
+  <main class="list-main">
+    <h1 class="list-title">Challenges</h1>
+
+    <div class="challenge-grid">
+      @for (challenge of challenges; track challenge.id) {
+        <button class="challenge-card" (click)="open(challenge)">
+          <div class="card-top">
+            <span class="card-number">#{{ challenge.id }}</span>
+            @if (isSolved(challenge)) {
+              <span class="card-solved">✓</span>
+            }
+          </div>
+          <h2 class="card-title">{{ challenge.title }}</h2>
+          <div class="card-meta">
+            <span class="card-category">{{ challenge.category }}</span>
+            <span class="card-difficulty" [class]="'diff-' + challenge.difficulty">
+              {{ challenge.difficulty }}
+            </span>
+          </div>
+        </button>
+      }
+    </div>
+  </main>
+</div>

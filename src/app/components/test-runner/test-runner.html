@@ -1,0 +1,28 @@
+<div class="results-panel">
+  <div class="results-header">
+    <span class="panel-title">Test Results</span>
+    @if (hasRun()) {
+      <span class="summary">{{ passCount() }} / {{ total() }} passing</span>
+    }
+  </div>
+
+  @if (hasRun()) {
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" [style.width.%]="progressPct()"></div>
+    </div>
+
+    <div class="test-list">
+      @for (result of results(); track result.name) {
+        <div class="test-row" [class.pass]="result.passed" [class.fail]="!result.passed">
+          <span class="test-icon">{{ result.passed ? '✓' : '✕' }}</span>
+          <span class="test-name">{{ result.name }}</span>
+          @if (!result.passed && result.error) {
+            <span class="test-error">{{ result.error }}</span>
+          }
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="empty-state">Run tests to see results</div>
+  }
+</div>

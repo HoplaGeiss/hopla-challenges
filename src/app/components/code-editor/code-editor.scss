@@ -1,0 +1,57 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.editor-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #1e1e1e;
+}
+
+.tab-bar {
+  display: flex;
+  background: #252526;
+  border-bottom: 0.5px solid #3c3c3c;
+  flex-shrink: 0;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  height: 35px;
+  font-size: 13px;
+  color: #9d9d9d;
+  cursor: pointer;
+  border-right: 0.5px solid #3c3c3c;
+
+  &.active {
+    color: #fff;
+    background: #1e1e1e;
+    border-top: 1px solid #dd0031;
+  }
+}
+
+.tab-icon {
+  font-size: 10px;
+  font-weight: 700;
+  color: #3178c6;
+  background: rgba(49, 120, 198, 0.15);
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+
+.monaco-wrapper {
+  flex: 1;
+  overflow: hidden;
+
+  ngx-monaco-editor {
+    display: block;
+    height: 100%;
+    width: 100%;
+  }
+}

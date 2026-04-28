@@ -1,0 +1,143 @@
+<!-- Top bar -->
+<header class="top-bar">
+  <a class="logo" routerLink="/">
+    <svg viewBox="0 0 24 24" width="26" height="26" fill="#DD0031">
+      <path d="M12 1L3 5v6c0 5.25 3.75 10.15 9 11.25C17.25 21.15 21 16.25 21 11V5L12 1z"/>
+    </svg>
+    <span class="logo-text">hoplaChallenges</span>
+  </a>
+
+  <div class="challenge-info">
+    <button class="challenge-title-btn" (click)="toggleDrawer()">
+      {{ challenge().title }}
+      <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"
+           [style.transform]="drawerOpen() ? 'rotate(180deg)' : 'rotate(0)'">
+        <path d="M7 10l5 5 5-5H7z"/>
+      </svg>
+    </button>
+    <span class="difficulty-badge" [class]="'badge-' + challenge().difficulty">
+      {{ challenge().difficulty }}
+    </span>
+    <span class="category-tag">{{ challenge().category }}</span>
+  </div>
+
+  <div class="top-actions">
+    <button class="btn-reset" (click)="resetCode()" title="Reset to starter code">↺</button>
+    <button class="btn-hint" (click)="loadHint()" title="Load reference solution">Hint</button>
+    <button class="btn-run" (click)="runTests()" [class.success]="allPassing()">
+      @if (allPassing()) { ✓ All Passing } @else { ▶ Run Tests }
+    </button>
+  </div>
+</header>
+
+<!-- Challenge picker drawer -->
+@if (drawerOpen()) {
+  <div class="drawer-backdrop" (click)="closeDrawer()"></div>
+  <aside class="challenge-drawer">
+    <div class="drawer-header">
+      <span class="drawer-title">All Challenges</span>
+      <button class="drawer-close" (click)="closeDrawer()">✕</button>
+    </div>
+    <div class="drawer-list">
+      @for (ch of allChallenges; track ch.id) {
+        <button
+          class="drawer-item"
+          [class.active]="ch.id === challenge().id"
+          (click)="openChallenge(ch)">
+          <div class="drawer-item-left">
+            <span class="drawer-item-title">{{ ch.title }}</span>
+            <span class="drawer-item-category">{{ ch.category }}</span>
+          </div>
+          <div class="drawer-item-right">
+            <span class="drawer-diff" [class]="'diff-' + ch.difficulty">{{ ch.difficulty }}</span>
+            @if (isSolved(ch)) {
+              <span class="drawer-solved">✓</span>
+            }
+          </div>
+        </button>
+      }
+    </div>
+  </aside>
+}
+
+<!-- Main layout -->
+<div class="main-layout">
+
+  <!-- Left panel -->
+  <aside class="left-panel" #leftPanel>
+    <div class="tab-nav">
+      <button class="tab-btn" [class.active]="leftTab() === 'description'" (click)="setLeftTab('description')">Description</button>
+      <button class="tab-btn" [class.active]="leftTab() === 'tests'" (click)="setLeftTab('tests')">Tests</button>
+      <button class="tab-btn" [class.active]="leftTab() === 'solutions'" (click)="setLeftTab('solutions')">Solutions</button>
+    </div>
+
+    <div class="tab-content">
+      @if (leftTab() === 'description') {
+        <div class="description-body">
+          <div class="markdown-body" [innerHTML]="descriptionHtml()"></div>
+          <div class="tags">
+            <span class="tag">{{ challenge().category }}</span>
+            <span class="tag tag-diff" [class]="'tag-' + challenge().difficulty">
+              {{ challenge().difficulty }}
+            </span>
+          </div>
+        </div>
+      }
+      @if (leftTab() === 'tests') {
+        <div class="tests-body">
+          @for (test of challenge().tests; track test.name) {
+            <div class="test-item">
+              <span class="test-bullet">›</span>
+              <span>{{ test.name }}</span>
+            </div>
+          }
+        </div>
+      }
+      @if (leftTab() === 'solutions') {
+        <div class="solutions-body">
+          @if (solved()) {
+            <div class="solution-label">Reference solution</div>
+            <div class="markdown-body" [innerHTML]="solutionHtml()"></div>
+          } @else {
+            <p class="empty-msg">Submit a passing solution to unlock the reference answer.</p>
+          }
+        </div>
+      }
+    </div>
+  </aside>
+
+  <!-- Horizontal resize handle -->
+  <div class="resize-handle resize-handle--h"
+       appResizeHandle
+       [panel]="leftPanel"
+       direction="horizontal"
+       [min]="200"
+       [max]="600">
+  </div>
+
+  <!-- Right panel -->
+  <div class="right-panel">
+    <div class="editor-area" #editorArea>
+      <app-code-editor
+        [initialCode]="userCode()"
+        (codeChange)="onCodeChange($event)"
+        (modelUriReady)="onModelUriReady($event)"
+      />
+    </div>
+
+    <div class="resize-handle resize-handle--v"
+         appResizeHandle
+         [panel]="editorArea"
+         direction="vertical"
+         [min]="100"
+         [max]="600">
+    </div>
+
+    <div class="results-area">
+      <app-test-runner
+        [results]="testResults()"
+        [hasRun]="hasRun()"
+      />
+    </div>
+  </div>
+</div>
