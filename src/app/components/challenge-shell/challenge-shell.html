@@ -15,15 +15,19 @@
         <path d="M7 10l5 5 5-5H7z"/>
       </svg>
     </button>
-    <span class="difficulty-badge" [class]="'badge-' + challenge().difficulty">
-      {{ challenge().difficulty }}
-    </span>
-    <span class="category-tag">{{ challenge().category }}</span>
   </div>
 
   <div class="top-actions">
     <button class="btn-reset" (click)="resetCode()" title="Reset to starter code">↺</button>
-    <button class="btn-hint" (click)="loadHint()" title="Load reference solution">Hint</button>
+    @if (isDev) {
+      <button class="btn-reset" (click)="loadSolution()" title="Load solution (dev only)">✓</button>
+    }
+    <div class="hint-wrap">
+      <button class="btn-hint" (click)="toggleHint()">Hint</button>
+      @if (hintOpen()) {
+        <div class="hint-popover" role="tooltip">{{ challenge().hint }}</div>
+      }
+    </div>
     <button class="btn-run" (click)="runTests()" [class.success]="allPassing()">
       @if (allPassing()) { ✓ All Passing } @else { ▶ Run Tests }
     </button>
@@ -74,13 +78,16 @@
     <div class="tab-content">
       @if (leftTab() === 'description') {
         <div class="description-body">
-          <div class="markdown-body" [innerHTML]="descriptionHtml()"></div>
-          <div class="tags">
-            <span class="tag">{{ challenge().category }}</span>
-            <span class="tag tag-diff" [class]="'tag-' + challenge().difficulty">
-              {{ challenge().difficulty }}
-            </span>
+          <div class="description-header">
+            <h2 class="description-title">{{ challenge().title }}</h2>
+            <div class="tags">
+              <span class="tag">{{ challenge().category }}</span>
+              <span class="tag tag-diff" [class]="'tag-' + challenge().difficulty">
+                {{ challenge().difficulty }}
+              </span>
+            </div>
           </div>
+          <div class="markdown-body" [innerHTML]="descriptionHtml()"></div>
         </div>
       }
       @if (leftTab() === 'tests') {

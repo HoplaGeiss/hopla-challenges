@@ -11,7 +11,12 @@
   "private": true,
   "packageManager": "pnpm@10.9.0",
   "pnpm": {
-    "onlyBuiltDependencies": ["@parcel/watcher", "esbuild", "lmdb", "msgpackr-extract"]
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "esbuild",
+      "lmdb",
+      "msgpackr-extract"
+    ]
   },
   "dependencies": {
     "@angular/common": "^21.2.0",
@@ -23,6 +28,7 @@
     "marked": "^18.0.2",
     "monaco-editor": "^0.55.1",
     "ngx-monaco-editor-v2": "^21.1.4",
+    "posthog-js": "^1.372.3",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

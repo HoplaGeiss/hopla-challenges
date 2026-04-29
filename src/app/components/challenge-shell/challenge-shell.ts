@@ -1,15 +1,17 @@
-import { Component, inject, signal, computed, effect } from '@angular/core';
+import { Component, inject, signal, computed, effect, ViewEncapsulation } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { ChallengeService } from '../../services/challenge';
 import { TestRunnerService } from '../../services/test-runner';
 import { StorageService } from '../../services/storage';
+import { PostHogService } from '../../services/posthog.service';
 import { CodeEditor } from '../code-editor/code-editor';
 import { TestRunnerPanel } from '../test-runner/test-runner';
 import { ResizeHandle } from '../resize-handle';
 import { TestResult, Challenge } from '../../challenges/challenge.model';
 import { marked } from 'marked';
+import { environment } from '../../../environments/environment';
 
 type LeftTab = 'description' | 'tests' | 'solutions';
 
@@ -18,15 +20,17 @@ type LeftTab = 'description' | 'tests' | 'solutions';
   imports: [CodeEditor, TestRunnerPanel, ResizeHandle, RouterLink],
   templateUrl: './challenge-shell.html',
   styleUrl: './challenge-shell.scss',
+  encapsulation: ViewEncapsulation.None,
 })
 export class ChallengeShell {
   private readonly router = inject(Router);
   private readonly routeId = toSignal(
-    inject(ActivatedRoute).paramMap.pipe(map(p => Number(p.get('id'))))
+    inject(ActivatedRoute).paramMap.pipe(map((p) => Number(p.get('id')))),
   );
   private readonly challengeService = inject(ChallengeService);
   private readonly testRunnerService = inject(TestRunnerService);
   private readonly storage = inject(StorageService);
+  private readonly posthogService = inject(PostHogService);
 
   protected readonly challenge = this.challengeService.current;
   protected readonly allChallenges = this.challengeService.getAll();
@@ -37,6 +41,7 @@ export class ChallengeShell {
   protected hasRun = signal(false);
   protected solved = signal(false);
   protected drawerOpen = signal(false);
+  protected hintOpen = signal(false);
   private editorModelUri = '';
 
   protected descriptionHtml = computed(() => {
@@ -65,6 +70,7 @@ export class ChallengeShell {
       this.hasRun.set(false);
       this.leftTab.set('description');
       this.drawerOpen.set(false);
+      this.hintOpen.set(false);
     });
   }
 
@@ -78,7 +84,7 @@ export class ChallengeShell {
   }
 
   protected toggleDrawer(): void {
-    this.drawerOpen.update(v => !v);
+    this.drawerOpen.update((v) => !v);
   }
 
   protected closeDrawer(): void {
@@ -91,6 +97,17 @@ export class ChallengeShell {
 
   protected setLeftTab(tab: LeftTab): void {
     this.leftTab.set(tab);
+    if (tab === 'solutions') {
+      const ch = this.challenge();
+      if (ch) {
+        this.posthogService.posthog.capture('solution_tab_viewed', {
+          challenge_id: ch.id,
+          challenge_title: ch.title,
+          challenge_category: ch.category,
+          challenge_difficulty: ch.difficulty,
+        });
+      }
+    }
   }
 
   protected onCodeChange(code: string): void {
@@ -100,32 +117,77 @@ export class ChallengeShell {
   }
 
   protected resetCode(): void {
-    const starter = this.challenge().starterCode;
+    const ch = this.challenge();
+    const starter = ch.starterCode;
     this.userCode.set(starter);
     this.hasRun.set(false);
-    this.storage.saveProgress(this.challenge().id, { code: starter });
+    this.storage.saveProgress(ch.id, { code: starter });
+    this.posthogService.posthog.capture('code_reset', {
+      challenge_id: ch.id,
+      challenge_title: ch.title,
+      challenge_category: ch.category,
+      challenge_difficulty: ch.difficulty,
+    });
   }
 
-  protected loadHint(): void {
-    const solution = this.challenge().solution;
-    this.userCode.set(solution);
-    this.hasRun.set(false);
-    this.storage.saveProgress(this.challenge().id, { code: solution });
+  protected toggleHint(): void {
+    const wasOpen = this.hintOpen();
+    this.hintOpen.update(v => !v);
+    if (!wasOpen) {
+      const ch = this.challenge();
+      this.posthogService.posthog.capture('hint_used', {
+        challenge_id: ch.id,
+        challenge_title: ch.title,
+        challenge_category: ch.category,
+        challenge_difficulty: ch.difficulty,
+      });
+    }
   }
 
   protected async runTests(): Promise<void> {
     const ch = this.challenge();
     if (!ch) return;
-    const results = await this.testRunnerService.run(this.userCode(), ch.tests, this.editorModelUri);
+    const results = await this.testRunnerService.run(
+      this.userCode(),
+      ch.tests,
+      this.editorModelUri,
+    );
     this.testResults.set(results);
     this.hasRun.set(true);
-    if (results.every((r) => r.passed)) {
+
+    const passed = results.filter((r) => r.passed).length;
+    const total = results.length;
+    const allPassed = results.every((r) => r.passed);
+
+    this.posthogService.posthog.capture('tests_run', {
+      challenge_id: ch.id,
+      challenge_title: ch.title,
+      challenge_category: ch.category,
+      challenge_difficulty: ch.difficulty,
+      passed_count: passed,
+      total_count: total,
+      all_passed: allPassed,
+    });
+
+    if (allPassed) {
       this.solved.set(true);
       this.storage.saveProgress(ch.id, { solved: true });
+      this.posthogService.posthog.capture('challenge_solved', {
+        challenge_id: ch.id,
+        challenge_title: ch.title,
+        challenge_category: ch.category,
+        challenge_difficulty: ch.difficulty,
+      });
     }
   }
 
-  protected allPassing = computed(
-    () => this.hasRun() && this.testResults().every((r) => r.passed)
-  );
+  protected allPassing = computed(() => this.hasRun() && this.testResults().every((r) => r.passed));
+  protected readonly isDev = !environment.production;
+
+  protected loadSolution(): void {
+    const ch = this.challenge();
+    this.userCode.set(ch.solution);
+    this.hasRun.set(false);
+    this.storage.saveProgress(ch.id, { code: ch.solution });
+  }
 }

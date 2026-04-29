@@ -7,9 +7,7 @@ export const CHALLENGES: Challenge[] = [
     title: 'Temperature Pipe',
     category: 'Pipes',
     difficulty: 'medium',
-    description: `## Temperature Pipe
-
-Create a pipe called \`temperature\` that converts a Celsius value to Fahrenheit (\`'F'\`) or Kelvin (\`'K'\`).
+    description: `Create a pipe called \`temperature\` that converts a Celsius value to Fahrenheit (\`'F'\`) or Kelvin (\`'K'\`).
 
 ### Usage
 
@@ -23,16 +21,10 @@ Create a pipe called \`temperature\` that converts a Celsius value to Fahrenheit
 
 - **Celsius → Fahrenheit:** \`(C × 9/5) + 32\`
 - **Celsius → Kelvin:** \`C + 273.15\`
-
-### Requirements
-
-- Decorate the class with \`@Pipe({ name: 'temperature' })\`
-- Implement \`PipeTransform\` and its \`transform(value, unit)\` method
-- Return the result as a string with the unit appended (no space before unit symbol)
 `,
     starterCode: `import { Pipe, PipeTransform } from '@angular/core';
 
-@Pipe({ name: 'temperature', standalone: true })
+@Pipe({ name: 'temperature' })
 export class TemperaturePipe implements PipeTransform {
   transform(value: number, unit: 'F' | 'K'): string {
     // Your implementation here
@@ -40,9 +32,10 @@ export class TemperaturePipe implements PipeTransform {
   }
 }
 `,
+    hint: `Check the unit with an \`if\` or ternary, apply the formula, then use a template literal to append the symbol — \`°F\` or \`K\` — directly after the number with no space.`,
     solution: `import { Pipe, PipeTransform } from '@angular/core';
 
-@Pipe({ name: 'temperature', standalone: true })
+@Pipe({ name: 'temperature' })
 export class TemperaturePipe implements PipeTransform {
   transform(value: number, unit: 'F' | 'K'): string {
     if (unit === 'F') {
@@ -53,24 +46,6 @@ export class TemperaturePipe implements PipeTransform {
 }
 `,
     tests: [
-      {
-        name: 'Pipe has @Pipe decorator with name "temperature"',
-        fn: (code) => {
-          if (!/@Pipe\s*\(\s*\{[^}]*name\s*:\s*['"]temperature['"]/.test(code)) {
-            return 'Expected @Pipe({ name: \'temperature\' }) decorator';
-          }
-          return true;
-        },
-      },
-      {
-        name: 'Implements PipeTransform',
-        fn: (code) => {
-          if (!/implements\s+PipeTransform/.test(code)) {
-            return 'Class must implement PipeTransform';
-          }
-          return true;
-        },
-      },
       {
         name: '0°C → Kelvin = "273.15K"',
         fn: (_, jsCode) => {
@@ -117,43 +92,29 @@ export class TemperaturePipe implements PipeTransform {
     title: 'Counter Component',
     category: 'Signals',
     difficulty: 'easy',
-    description: `## Counter Component
+    description: `Create a standalone Angular component called \`CounterComponent\` using Angular Signals.
 
-Create a standalone Angular component called \`CounterComponent\` using Angular Signals.
-
-### Requirements
-
-- A \`signal\` called \`count\` initialized to \`0\`
-- A \`computed\` called \`doubleCount\` that returns \`count() * 2\`
-- A \`<button>\` that increments \`count\` by 1 on click
-- The template must display both \`count\` and \`doubleCount\`
-
-### Example Template
-
-\`\`\`html
-<p>Count: {{ count() }}</p>
-<p>Double: {{ doubleCount() }}</p>
-<button (click)="increment()">Increment</button>
-\`\`\`
+The template is already wired up — implement the class logic to make it work.
 `,
     starterCode: `import { Component, signal, computed } from '@angular/core';
 
 @Component({
   selector: 'app-counter',
-  standalone: true,
   template: \`
-    <!-- Your template here -->
+    <p>Count: {{ count() }}</p>
+    <p>Double: {{ doubleCount() }}</p>
+    <button (click)="increment()">Increment</button>
   \`,
 })
 export class CounterComponent {
   // Your implementation here
 }
 `,
+    hint: `Declare \`count\` as a \`signal(0)\` and \`doubleCount\` as a \`computed()\` that reads it. In the template, call them as functions — \`count()\`, \`doubleCount()\` — and use \`count.update()\` inside your click handler rather than reassigning directly.`,
     solution: `import { Component, signal, computed } from '@angular/core';
 
 @Component({
   selector: 'app-counter',
-  standalone: true,
   template: \`
     <p>Count: {{ count() }}</p>
     <p>Double: {{ doubleCount() }}</p>
@@ -171,14 +132,7 @@ export class CounterComponent {
 `,
     tests: [
       {
-        name: 'Component has @Component decorator',
-        fn: (code) => {
-          if (!/@Component\s*\(/.test(code)) return 'Expected @Component decorator';
-          return true;
-        },
-      },
-      {
-        name: 'Declares a signal called count',
+        name: 'count is reactive',
         fn: (code) => {
           if (!/count\s*=\s*signal\s*\(\s*0\s*\)/.test(code)) {
             return 'Expected: count = signal(0)';
@@ -187,7 +141,7 @@ export class CounterComponent {
         },
       },
       {
-        name: 'Declares a computed called doubleCount',
+        name: 'doubleCount derives from count',
         fn: (code) => {
           if (!/doubleCount\s*=\s*computed\s*\(/.test(code)) {
             return 'Expected: doubleCount = computed(...)';
@@ -196,7 +150,7 @@ export class CounterComponent {
         },
       },
       {
-        name: 'doubleCount returns count * 2',
+        name: 'doubleCount is always twice the count',
         fn: (code) => {
           if (!/count\(\)\s*\*\s*2/.test(code)) {
             return 'Expected doubleCount to be computed(() => count() * 2)';
@@ -205,7 +159,7 @@ export class CounterComponent {
         },
       },
       {
-        name: 'Template has a button with click handler',
+        name: 'clicking the button increments count',
         fn: (code) => {
           if (!/\(click\)/.test(code)) return 'Expected a (click) event binding on a button';
           return true;
@@ -218,15 +172,13 @@ export class CounterComponent {
     title: 'Highlight Directive',
     category: 'Directives',
     difficulty: 'medium',
-    description: `## Highlight Directive
-
-Create an **attribute directive** called \`HighlightDirective\` with selector \`[appHighlight]\`.
+    description: `Create an **attribute directive** called \`HighlightDirective\` with selector \`[appHighlight]\`.
 
 ### Behavior
 
 - Accepts a \`color\` input (default: \`'yellow'\`)
-- On **mouseenter**: sets the host element's \`backgroundColor\` to the input color
-- On **mouseleave**: resets the \`backgroundColor\` to empty string
+- Hovering over the element sets its background to the input color
+- Moving the cursor away restores the original background
 
 ### Usage
 
@@ -234,44 +186,40 @@ Create an **attribute directive** called \`HighlightDirective\` with selector \`
 <p appHighlight>Hover me (yellow by default)</p>
 <p appHighlight color="lightblue">Hover me (light blue)</p>
 \`\`\`
-
-### Requirements
-
-- Use \`@Directive({ selector: '[appHighlight]' })\`
-- Use \`@HostListener\` for mouse events
-- Use \`@Input()\` for the color property
 `,
-    starterCode: `import { Directive, HostListener, Input, ElementRef } from '@angular/core';
+    starterCode: `import { Directive, ElementRef, inject, input } from '@angular/core';
 
 @Directive({
   selector: '[appHighlight]',
-  standalone: true,
+  host: {
+    // wire up mouse events here
+  },
 })
 export class HighlightDirective {
-  @Input() color = 'yellow';
-
-  constructor(private el: ElementRef) {}
+  color = input('yellow');
+  private el = inject(ElementRef);
 
   // Your implementation here
 }
 `,
-    solution: `import { Directive, HostListener, Input, ElementRef } from '@angular/core';
+    hint: `In the \`host\` object, bind \`'(mouseenter)'\` and \`'(mouseleave)'\` to method names as strings. Those methods can then reach the DOM element via \`this.el.nativeElement\` — remember that \`color\` is a signal, so read it with \`this.color()\`.`,
+    solution: `import { Directive, ElementRef, inject, input } from '@angular/core';
 
 @Directive({
   selector: '[appHighlight]',
-  standalone: true,
+  host: {
+    '(mouseenter)': 'onMouseEnter()',
+    '(mouseleave)': 'onMouseLeave()',
+  },
 })
 export class HighlightDirective {
-  @Input() color = 'yellow';
+  color = input('yellow');
+  private el = inject(ElementRef);
 
-  constructor(private el: ElementRef) {}
-
-  @HostListener('mouseenter')
   onMouseEnter(): void {
-    this.el.nativeElement.style.backgroundColor = this.color;
+    this.el.nativeElement.style.backgroundColor = this.color();
   }
 
-  @HostListener('mouseleave')
   onMouseLeave(): void {
     this.el.nativeElement.style.backgroundColor = '';
   }
@@ -279,43 +227,25 @@ export class HighlightDirective {
 `,
     tests: [
       {
-        name: 'Directive has selector [appHighlight]',
+        name: 'hovering applies the color',
         fn: (code) => {
-          if (!/selector\s*:\s*['"`]\[appHighlight\]['"`]/.test(code)) {
-            return 'Expected selector: \'[appHighlight]\'';
+          if (!/host\s*:\s*\{[^}]*\(mouseenter\)/.test(code)) {
+            return 'Expected host: { \'(mouseenter)\': \'...\' }';
           }
           return true;
         },
       },
       {
-        name: 'Has @Input() color property',
+        name: 'moving away removes the color',
         fn: (code) => {
-          if (!/@Input\(\)\s+color/.test(code) && !/color\s*=\s*input\(/.test(code)) {
-            return 'Expected @Input() color or color = input(...)';
+          if (!/host\s*:\s*\{[^}]*\(mouseleave\)/.test(code)) {
+            return 'Expected host: { \'(mouseleave)\': \'...\' }';
           }
           return true;
         },
       },
       {
-        name: 'Has @HostListener for mouseenter',
-        fn: (code) => {
-          if (!/@HostListener\s*\(\s*['"]mouseenter['"]/.test(code)) {
-            return 'Expected @HostListener(\'mouseenter\')';
-          }
-          return true;
-        },
-      },
-      {
-        name: 'Has @HostListener for mouseleave',
-        fn: (code) => {
-          if (!/@HostListener\s*\(\s*['"]mouseleave['"]/.test(code)) {
-            return 'Expected @HostListener(\'mouseleave\')';
-          }
-          return true;
-        },
-      },
-      {
-        name: 'Sets backgroundColor on mouseenter',
+        name: 'the background color is what changes',
         fn: (code) => {
           if (!/backgroundColor/.test(code)) {
             return 'Expected el.nativeElement.style.backgroundColor to be set';

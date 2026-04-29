@@ -14,6 +14,7 @@ export interface Challenge {
   difficulty: Difficulty;
   description: string;
   starterCode: string;
+  hint: string;
   solution: string;
   tests: ChallengeTest[];
 }
